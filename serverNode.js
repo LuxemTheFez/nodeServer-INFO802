@@ -10,7 +10,7 @@ const server = app().use(app.static('www')).listen(PORT, () => {
 });
 
 const urlSoap = 'https://soapservice-info802.herokuapp.com/?wsdl';
-const urlApi = 'http://localhost:5000/';
+const urlApi = 'https://flaskapirest-info802.herokuapp.com';
 var args = {};
 
 var io = socketio(server);
