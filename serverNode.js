@@ -5,9 +5,9 @@ const request = require('request');
 
 const PORT = process.env.PORT || 3000;
 
-const server = app().use(app.static('www').listen(PORT, () => {
+const server = app().use(app.static('www')).listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
-}));
+});
 
 const urlSoap = 'https://soapservice-info802.herokuapp.com/?wsdl';
 const urlApi = 'http://localhost:5000/';
