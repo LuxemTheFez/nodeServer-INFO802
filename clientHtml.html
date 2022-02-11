@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client html soap</title>	
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+
+</head>
+
+
+
+<body>
+<h1>Voiture électrique</h1>
+<div>
+    <label >Choissez votre voiture : </label>
+    <select id="car-model" onchange="updateSelect(this)"></select>
+</div>
+<div>
+    <div>
+        La voiture à une autonomie de : <div id="range" class="infoCar"></div>
+    </div>
+
+    <div>
+        Temps de recharge rapide : <div id="fastChargeTime" class="infoCar"></div>
+     </div>
+    
+    <div>
+        Temps de recharge normal : <div id="chargeTime" class="infoCar"></div>
+    </div>
+</div>
+
+<form>
+    <div>
+        <label>Distance à parcourir</label>
+        <input type="number" id="distance" value="1" min="1" step="1" >
+    </div>
+    <div>
+        <label>Vitesse moyenne du trajet</label>
+        <input type="number" id="speed" value="60" min="60" max="145" step="5">
+    </div>
+    <input type="button" value="Calculer" onclick="calculate()">
+</form>
+<div>
+    Le trajet prendra : 
+    <div id="time" class="infoCar"></div>
+</div>
+
+<style>
+    .infoCar{
+        display: inline-block;
+        text-align: center;
+    }
+</style>
+<script>
+
+    var socket = io();
+    var mycars;
+
+
+    window.onload = addCarsName;
+    function addCarsName(){
+        socket.emit("requestCarArray");
+        socket.on('sendCarArray',function(carArray){
+            mycars = carArray;
+            console.log(mycars);
+            var list = document.getElementById('car-model');
+
+            mycars.forEach(function(item, index){
+                var option = document.createElement('option');
+                option.value = index;
+                option.innerHTML = item['model'];                
+                list.appendChild(option);
+
+            });
+
+
+            var range = document.getElementById("range");
+            var fastChargeTime = document.getElementById('fastChargeTime');
+            var chargeTime = document.getElementById('chargeTime');
+
+            range.innerText = mycars[0]['range'] + 'km';
+            fastChargeTime.innerHTML = mycars[0]['fastChargeTime'] + 'min(s)';
+            chargeTime.innerHTML = mycars[0]['chargeTime'] + 'min(s)';
+        });
+    }
+
+    function updateSelect(selectObject) {
+
+            var index = selectObject.selectedIndex;
+            var range = document.getElementById("range");
+            var fastChargeTime = document.getElementById('fastChargeTime');
+            var chargeTime = document.getElementById('chargeTime');
+
+            range.innerHTML = mycars[index]['range'] + 'km';
+            if (mycars[index]['fastChargeTime']==0){
+                fastChargeTime.innerHTML = 'Non disponible';
+                
+            }else{
+                fastChargeTime.innerHTML = mycars[index]['fastChargeTime'] + 'min(s)';
+            }
+            chargeTime.innerHTML = mycars[index]['chargeTime'] + 'min(s)';
+        }
+      
+    function calculate(){
+        console.log("calculate");
+        
+        var index = document.getElementById('car-model').selectedIndex;
+        console.log(index);
+        console.log(mycars[index]);
+        socket.emit('calculateRideTime',  mycars[index], document.getElementById('distance').value, document.getElementById('speed').value);
+        
+        socket.on('getRideTime',function(result){
+        var time = document.getElementById('time');
+        time.innerText = result;
+    });
+    }
+
+    
+            
+
+</script>
+</body>
+</html>
