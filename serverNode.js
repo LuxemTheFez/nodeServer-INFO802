@@ -5,7 +5,7 @@ const request = require('request');
 
 const PORT = process.env.PORT || 3000;
 
-const server = app().use(app.static(path.join(__dirname, 'www').listen(PORT, () => {
+const server = app().use(app.static('www').listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 })));
 
