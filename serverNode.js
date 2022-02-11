@@ -13,13 +13,6 @@ const urlSoap = 'https://soapservice-info802.herokuapp.com/?wsdl';
 const urlApi = 'http://localhost:5000/';
 var args = {};
 
-app.get('/', function(req, res){
-    res.send('www/clientHtml.html');
-   });
-http.listen(8080, function(){
-    console.log('listening on *:8080');
-   });
-   
 io.on('connection', function(socket){
 
     socket.on('requestCarNameArray',function(){
