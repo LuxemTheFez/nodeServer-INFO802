@@ -17,7 +17,7 @@ var io = socketio(server);
 io.on('connection', function(socket){
 
     socket.on('requestCarNameArray',function(){
-        soap.createClient(url, function(err, client) {
+        soap.createClient(urlSoap, function(err, client) {
             client.get_car(args, function(err, result) {
                 let evalData = JSON.parse(result.get_carResult);
                 evalData.forEach(car => res.push(car['model']));
@@ -27,7 +27,7 @@ io.on('connection', function(socket){
     })
 
     socket.on('requestCarArray',function(){
-        soap.createClient(url, function(err, client) {
+        soap.createClient(urlSoap, function(err, client) {
             client.get_car(args, function(err, result) {
                 let evalData = JSON.parse(result.get_carResult);
                 io.emit('sendCarArray', evalData)
@@ -38,9 +38,9 @@ io.on('connection', function(socket){
     socket.on('calculateRideTime',function(data, rideLength, averageSpeed){
         console.log(data)
         if (rideLength!=0 && averageSpeed!=0){
-            var urlApi = `${urlApi}Car?rideLength=${rideLength}&fastChargeTime=${data['fastChargeTime']}&chargeTime=${data['chargeTime']}&batterySize=${data['range']}&averageSpeed=${averageSpeed}`;
-            console.log(urlApi)
-            request(urlApi, (error, response, body)=>{
+            var restApi = `${urlApi}Car?rideLength=${rideLength}&fastChargeTime=${data['fastChargeTime']}&chargeTime=${data['chargeTime']}&batterySize=${data['range']}&averageSpeed=${averageSpeed}`;
+            console.log(restApi)
+            request(restApi, (error, response, body)=>{
         
                 // Printing the error if occurred
                 if(error) console.log(error)
