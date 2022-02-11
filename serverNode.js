@@ -1,14 +1,20 @@
 var app = require('express')();
-var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var soap = require('soap');
 const request = require('request');
 
-var url = 'https://soapservice-info802.herokuapp.com/?wsdl';
+const PORT = process.env.PORT || 3000;
+
+const server = app().use(express.static(path.join(__dirname, 'www').listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+})));
+
+const urlSoap = 'https://soapservice-info802.herokuapp.com/?wsdl';
+const urlApi = 'http://localhost:5000/';
 var args = {};
 
 app.get('/', function(req, res){
-    res.sendFile('clientHtml.html');
+    res.send('www/clientHtml.html');
    });
 http.listen(8080, function(){
     console.log('listening on *:8080');
@@ -38,7 +44,7 @@ io.on('connection', function(socket){
     socket.on('calculateRideTime',function(data, rideLength, averageSpeed){
         console.log(data)
         if (rideLength!=0 && averageSpeed!=0){
-            var urlApi = `http://localhost:5000/Car?rideLength=${rideLength}&fastChargeTime=${data['fastChargeTime']}&chargeTime=${data['chargeTime']}&batterySize=${data['range']}&averageSpeed=${averageSpeed}`;
+            var urlApi = `${urlApi}Car?rideLength=${rideLength}&fastChargeTime=${data['fastChargeTime']}&chargeTime=${data['chargeTime']}&batterySize=${data['range']}&averageSpeed=${averageSpeed}`;
             console.log(urlApi)
             request(urlApi, (error, response, body)=>{
         
