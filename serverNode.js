@@ -8,7 +8,7 @@ var url = 'https://soapservice-info802.herokuapp.com/?wsdl';
 var args = {};
 
 app.get('/', function(req, res){
-    res.sendFile('C:/Users/Luxem/Documents/Cours/M1/INFO802/service/clientHtml.html');
+    res.sendFile('clientHtml.html');
    });
 http.listen(8080, function(){
     console.log('listening on *:8080');
