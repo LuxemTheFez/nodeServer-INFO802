@@ -1,5 +1,5 @@
 var app = require('express')();
-var io = require('socket.io')(http);
+var io = require('socket.io');
 var soap = require('soap');
 const request = require('request');
 
