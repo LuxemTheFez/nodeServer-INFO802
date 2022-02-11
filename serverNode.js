@@ -1,5 +1,5 @@
 var app = require('express');
-var io = require('socket.io');
+var socketio = require('socket.io');
 var soap = require('soap');
 const request = require('request');
 
@@ -13,6 +13,7 @@ const urlSoap = 'https://soapservice-info802.herokuapp.com/?wsdl';
 const urlApi = 'http://localhost:5000/';
 var args = {};
 
+var io = socketio(server);
 io.on('connection', function(socket){
 
     socket.on('requestCarNameArray',function(){
