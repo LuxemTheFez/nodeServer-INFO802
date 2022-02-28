@@ -7,7 +7,23 @@
     <title>Client html soap</title>	
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-
+    <script>
+        // Initialize and add the map
+        function initMap() {
+          // The location of Uluru
+          const uluru = { lat: -25.344, lng: 131.036 };
+          // The map, centered at Uluru
+          const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 4,
+            center: uluru,
+          });
+          // The marker, positioned at Uluru
+          const marker = new google.maps.Marker({
+            position: uluru,
+            map: map,
+          });
+        }
+      </script>
 </head>
 
 
@@ -75,10 +91,7 @@
             <div id="map"></div>
         </div>
 
-        <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAe_OHlyN_3XxzesSP1CeA0F_R8CR5N5jg&callback=initMap&libraries=&v=weekly"
-      async
-      ></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAe_OHlyN_3XxzesSP1CeA0F_R8CR5N5jg&callback=initMap&libraries=&v=weekly" async></script>
 
     </div>
 
