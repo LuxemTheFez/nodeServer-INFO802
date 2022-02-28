@@ -35,19 +35,19 @@
                     unitSystem: google.maps.UnitSystem.METRIC
                 };
 
-                // directionsService.route(request, (response, status) => {
-                //     if (status == google.maps.DirectionsStatus.OK) {
-                //         const output = document.querySelector("output");
-                //         resultDistance = response.routes[0].legs[0].distance.text;
-                //         resultDuration = response.routes[0].legs[0].duration.text;
-                //         output.innerHTML = "<div class='tag is-success'> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ result + "<br> Durée : "+resultDuration +"</div>";
-                //         directionsDisplay.setDirections(response);
-                //     }else{
-                //         directionsDisplay.setDirections({routes: []});
-                //         const output = document.querySelector("output");
-                //         output.innerHTML = "<div class='tag is-danger'> Erreur : "+ status +"</div>";
-                //     }
-                // });
+                directionsService.route(request, (response, status) => {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        const output = document.querySelector("output");
+                        resultDistance = response.routes[0].legs[0].distance.text;
+                        resultDuration = response.routes[0].legs[0].duration.text;
+                        output.innerHTML = "<div class='tag is-success'> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ result + "<br> Durée : "+resultDuration +"</div>";
+                        directionsDisplay.setDirections(response);
+                    }else{
+                        directionsDisplay.setDirections({routes: []});
+                        const output = document.querySelector("output");
+                        output.innerHTML = "<div class='tag is-danger'> Erreur : "+ status +"</div>";
+                    }
+                });
             }
 
             var options = {
@@ -107,11 +107,11 @@
             <form>
                 <div>
                     <label class="label">Distance à parcourir</label>
-                    <input class="input is-rounded" type="number" id="depart" value="1" min="1" step="1" >
+                    <input class="input is-rounded" type="number" id="distance" value="1" min="1" step="1" >
                 </div>
                 <div>
                     <label class="label">Vitesse moyenne du trajet</label>
-                    <input class="input is-rounded" type="number" id="arrivee" value="60" min="60" max="145" step="5">
+                    <input class="input is-rounded" type="number" id="speed" value="60" min="60" max="145" step="5">
                 </div>
                 <div class="control">
                     <input class="button is-link" type="button" value="Calculer" onclick="calculate()">
@@ -131,11 +131,11 @@
                     <form>
                         <div>
                             <label class="label">Départ : </label>
-                            <input class="input is-rounded" type="text">
+                            <input class="input is-rounded" type="text" iid="depart">
                         </div>
                         <div>
                             <label class="label">Arrivé : </label>
-                            <input class="input is-rounded" type="text">
+                            <input class="input is-rounded" type="text" id="arrivee">
                         </div>
                         <div class="control">
                             <input class="button is-link" type="button" value="Calculer" onclick="calculTrajet()" >
