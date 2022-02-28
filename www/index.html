@@ -10,19 +10,57 @@
     <script>
         // Initialize and add the map
         function initMap() {
-          // The location of Uluru
-          const uluru = { lat: -25.344, lng: 131.036 };
-          // The map, centered at Uluru
-          const map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 4,
+            // The location of Uluru
+            const uluru = { lat: 45.3333, lng: 5.5833 };
+            // The map, centered at Uluru
+            const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 13,
             center: uluru,
-          });
-          // The marker, positioned at Uluru
-          const marker = new google.maps.Marker({
-            position: uluru,
-            map: map,
-          });
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+            
+            var directionsService = new google.maps.DirectionsService();
+
+            var directionsDisplay = new google.maps.DirectionsRenderer(); 
+
+            directionsDisplay.setMap(map);
         }
+
+
+            function calculTrajet(){
+                var request = {
+                    origin: document.getElementById("depart").value,
+                    destination: document.getElementById("arrivee").value,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC
+                };
+
+                // directionsService.route(request, (response, status) => {
+                //     if (status == google.maps.DirectionsStatus.OK) {
+                //         const output = document.querySelector("output");
+                //         resultDistance = response.routes[0].legs[0].distance.text;
+                //         resultDuration = response.routes[0].legs[0].duration.text;
+                //         output.innerHTML = "<div class='tag is-success'> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ result + "<br> Durée : "+resultDuration +"</div>";
+                //         directionsDisplay.setDirections(response);
+                //     }else{
+                //         directionsDisplay.setDirections({routes: []});
+                //         const output = document.querySelector("output");
+                //         output.innerHTML = "<div class='tag is-danger'> Erreur : "+ status +"</div>";
+                //     }
+                // });
+            }
+
+            var options = {
+                types: ['(cities)'],
+            };
+
+            var input1 = document.getElementById('depart');
+            var autocomplete1 = new google.maps.places.Autocomplete(input1, options);
+
+            var input2 = document.getElementById('arrivee');
+            var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
+         
+        
       </script>
 </head>
 
@@ -69,11 +107,11 @@
             <form>
                 <div>
                     <label class="label">Distance à parcourir</label>
-                    <input class="input is-rounded" type="number" id="distance" value="1" min="1" step="1" >
+                    <input class="input is-rounded" type="number" id="depart" value="1" min="1" step="1" >
                 </div>
                 <div>
                     <label class="label">Vitesse moyenne du trajet</label>
-                    <input class="input is-rounded" type="number" id="speed" value="60" min="60" max="145" step="5">
+                    <input class="input is-rounded" type="number" id="arrivee" value="60" min="60" max="145" step="5">
                 </div>
                 <div class="control">
                     <input class="button is-link" type="button" value="Calculer" onclick="calculate()">
@@ -88,7 +126,25 @@
         </div>
 
         <div class="box">
+            <div class="container">
+                <div class="notification is-primary">
+                    <form>
+                        <div>
+                            <label class="label">Départ : </label>
+                            <input class="input is-rounded" type="text">
+                        </div>
+                        <div>
+                            <label class="label">Arrivé : </label>
+                            <input class="input is-rounded" type="text">
+                        </div>
+                        <div class="control">
+                            <input class="button is-link" type="button" value="Calculer" onclick="calculTrajet()" >
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div id="map"></div>
+            <div id="output"></div>
         </div>
 
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAe_OHlyN_3XxzesSP1CeA0F_R8CR5N5jg&callback=initMap&libraries=&v=weekly" async></script>
@@ -104,7 +160,7 @@
 
     #center {
         margin: 0 auto;
-        width: fit-content;
+        width: 50%;
     }
 
     #map {
