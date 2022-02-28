@@ -6,13 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client html soap</title>	
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
 
 </head>
 
 
 
 <body>
-<h1>Voiture électrique</h1>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <p class="title">
+                TrajEctory : 
+            </p>
+            <p class="subtitle">
+                Calculateur de trajet pour voiture électrique
+            </p>    
+        </div>
+    </section>
 <div>
     <label >Choissez votre voiture : </label>
     <select id="car-model" onchange="updateSelect(this)"></select>
