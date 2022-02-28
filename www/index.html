@@ -24,10 +24,14 @@
             var directionsDisplay = new google.maps.DirectionsRenderer(); 
 
             directionsDisplay.setMap(map);
+
+            document.getElementById('button-trajet').addEventListener('click', function() {
+                calculTrajet(directionsService, directionsDisplay);
+            });
         }
 
 
-            function calculTrajet(){
+            function calculTrajet(directionsService, directionsDisplay){
                 var request = {
                     origin: document.getElementById("depart").value,
                     destination: document.getElementById("arrivee").value,
@@ -37,21 +41,24 @@
 
                 directionsService.route(request, (response, status) => {
                     if (status == google.maps.DirectionsStatus.OK) {
-                        const output = document.querySelector("output");
+                        const output = document.getElementById("output");
                         resultDistance = response.routes[0].legs[0].distance.text;
                         resultDuration = response.routes[0].legs[0].duration.text;
-                        output.innerHTML = "<div class='tag is-success'> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ result + "<br> Durée : "+resultDuration +"</div>";
+                        output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ resultDistance + "<br> Durée : "+resultDuration +"</div>";
                         directionsDisplay.setDirections(response);
                     }else{
                         directionsDisplay.setDirections({routes: []});
-                        const output = document.querySelector("output");
+                        const output = document.getElementById("output");
                         output.innerHTML = "<div class='tag is-danger'> Erreur : "+ status +"</div>";
                     }
                 });
             }
 
             var options = {
-                types: ['(cities)'],
+                // types: ['(cities)'],
+                types: ['address'],
+            componentRestrictions:{'country': ['FR','IT']},
+            fields : ['place_id','geometry','name']
             };
 
             var input1 = document.getElementById('depart');
@@ -131,14 +138,14 @@
                     <form>
                         <div>
                             <label class="label">Départ : </label>
-                            <input class="input is-rounded" type="text" iid="depart">
+                            <input class="input is-rounded" type="text" id="depart">
                         </div>
                         <div>
                             <label class="label">Arrivé : </label>
                             <input class="input is-rounded" type="text" id="arrivee">
                         </div>
                         <div class="control">
-                            <input class="button is-link" type="button" value="Calculer" onclick="calculTrajet()" >
+                            <input class="button is-link" type="button" value="Calculer" id="button-trajet" >
                         </div>
                     </form>
                 </div>
