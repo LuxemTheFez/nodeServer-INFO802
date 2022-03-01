@@ -203,14 +203,24 @@
                     tabWaypointBorne.push({ location: new google.maps.LatLng(element[0], element[1]), stopover: true });
                 });
 
+                if(tabWaypointBorne>1){
+                    var request = {
+                        origin: document.getElementById("depart").value,
+                        destination: document.getElementById("arrivee").value,
+                        waypoints: tabWaypointBorne,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC
+                    };
+                }else{
+                    var request = {
+                        origin: document.getElementById("depart").value,
+                        destination: document.getElementById("arrivee").value,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC
+                    };
+                }
 
-                var request = {
-                    origin: document.getElementById("depart").value,
-                    destination: document.getElementById("arrivee").value,
-                    waypoints: tabWaypointBorne,
-                    travelMode: google.maps.TravelMode.DRIVING,
-                    unitSystem: google.maps.UnitSystem.METRIC
-                };
+
                 
 
                 directionsService.route(request, (response, status) => {
