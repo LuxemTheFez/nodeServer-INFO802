@@ -61,7 +61,7 @@ io.on('connection', function(socket){
 
         tabBorne.forEach(element => {
 
-            var restApi = `https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance=${element[0]}%2C${element[1]}%2C10000`;
+            var restApi = `https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance=${element[0]}%2C${element[1]}%2C15000`;
             request(restApi, (error, response, body)=>{
         
                 // Printing the error if occurred
