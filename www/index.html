@@ -8,83 +8,243 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script>
+       
+    var socket = io('https://nodeserver-info802.herokuapp.com');
+    var mycars;
+    var tabBorne = [];
+    var tabWaypointBorne = [];
+    var markersPos = [];
+    var dep;
+    var ari;
 
-            var options = {
-                // types: ['(cities)'],
-                types: ['address'],
-            componentRestrictions:{'country': ['FR']},
-            fields : ['place_id','geometry','name']
-            };
 
-            var input1 = document.getElementById('depart');
-            var autocomplete1 = new google.maps.places.Autocomplete(input1, options);
+    function secondsToHms(d) {
+        d = Number(d);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+    
+        var hDisplay = h > 0 ? h + (h == 1 ? " heure, " : " heures, ") : "";
+        var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+        var sDisplay = s > 0 ? s + (s == 1 ? " seconde" : " secondes") : "";
+        return hDisplay + mDisplay + sDisplay; 
+    }
 
-            var input2 = document.getElementById('arrivee');
-            var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
-         
+    window.onload = addCarsName;
+    function addCarsName(){
+        socket.emit("requestCarArray");
+        socket.on('sendCarArray',function(carArray){
+        mycars = carArray;
+        var list = document.getElementById('car-model');
 
-        // Initialize and add the map
-        function initMap() {
-            // The location of Uluru
-            const stJean = { lat: 45.3333, lng: 5.5833 };
-            // The map, centered at Uluru
-            const map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 13,
-            center: stJean,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-            
-            var directionsService = new google.maps.DirectionsService();
+        mycars.forEach(function(item, index){
+            var option = document.createElement('option');
+            option.value = index;
+            option.innerHTML = item['model'];                
+            list.appendChild(option);
 
-            var directionsDisplay = new google.maps.DirectionsRenderer(); 
+        });
 
-            directionsDisplay.setMap(map);
 
-            document.getElementById('button-trajet').addEventListener('click', function() {
-                calculTrajet(directionsService, directionsDisplay,map);
-            });
+        var range = document.getElementById("range");
+        var fastChargeTime = document.getElementById('fastChargeTime');
+        var chargeTime = document.getElementById('chargeTime');
+
+        range.innerText = mycars[0]['range'] + 'km';
+        fastChargeTime.innerHTML = mycars[0]['fastChargeTime'] + 'min(s)';
+        chargeTime.innerHTML = mycars[0]['chargeTime'] + 'min(s)';
+        });
+    }
+
+    function updateSelect(selectObject) {
+
+            var index = selectObject.selectedIndex;
+            var range = document.getElementById("range");
+            var fastChargeTime = document.getElementById('fastChargeTime');
+            var chargeTime = document.getElementById('chargeTime');
+
+            range.innerHTML = mycars[index]['range'] + 'km';
+            if (mycars[index]['fastChargeTime']==0){
+                fastChargeTime.innerHTML = 'Non disponible';
+                
+            }else{
+                fastChargeTime.innerHTML = mycars[index]['fastChargeTime'] + 'min(s)';
+            }
+            chargeTime.innerHTML = mycars[index]['chargeTime'] + 'min(s)';
         }
+      
+    function calculate(){
+        
+        var index = document.getElementById('car-model').selectedIndex;
+        socket.emit('calculateRideTime',  mycars[index], document.getElementById('distance').value, document.getElementById('speed').value);
+        
+        socket.on('getRideTime',function(result){
+        var time = document.getElementById('time');
+        time.innerText = result;
+    });
+    }
+
+    var options = {
+        // types: ['(cities)'],
+        types: ['address'],
+    componentRestrictions:{'country': ['FR']},
+    fields : ['place_id','geometry','name']
+    };
+
+    var input1 = document.getElementById('depart');
+    var autocomplete1 = new google.maps.places.Autocomplete(input1, options);
+
+    var input2 = document.getElementById('arrivee');
+    var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
 
 
-            function calculTrajet(directionsService, directionsDisplay,map){
+
+    // Initialize and add the map
+    function initMap() {
+        // The location of Uluru
+        const stJean = { lat: 45.3333, lng: 5.5833 };
+        // The map, centered at Uluru
+        const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 13,
+        center: stJean,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        
+        var directionsService = new google.maps.DirectionsService();
+
+        var directionsDisplay = new google.maps.DirectionsRenderer(); 
+
+        directionsDisplay.setMap(map);
+
+        document.getElementById('button-trajet').addEventListener('click', function() {
+             tabBorne = [];
+             tabWaypointBorne = [];
+             markersPos = [];
+            calculTrajet(directionsService, directionsDisplay,map,false);
+        });
+
+    }
+
+
+    function calculTrajet(directionsService, directionsDisplay,map,afficheBorne){
+
+            var request = {
+                origin: document.getElementById("depart").value,
+                destination: document.getElementById("arrivee").value,
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC
+            };
+        // }
+
+
+        directionsService.route(request, (response, status) => {
+            if (status == google.maps.DirectionsStatus.OK) {
+                const output = document.getElementById("output");
+                resultDistance = response.routes[0].legs[0].distance.text;
+                resultDuration = response.routes[0].legs[0].duration.text;
+
+                dep = [parseFloat(response.routes[0].legs[0].start_location.toUrlValue(6).split(',')[0]), parseFloat(response.routes[0].legs[0].start_location.toUrlValue(6).split(',')[1])]
+                ari = [parseFloat(response.routes[0].legs[0].end_location.toUrlValue(6).split(',')[0]), parseFloat(response.routes[0].legs[0].end_location.toUrlValue(6).split(',')[1])]
+
+                var compteur = 0;
+
+                response.routes[0].overview_path.forEach((e)=>{
+                    var markLat = parseFloat( e.toUrlValue(6).split(',')[0])
+                    var markLong = parseFloat(e.toUrlValue(6).split(',')[1])
+
+                    markersPos.push([markLat,markLong]);
+
+
+                })
+
+                    calculTrajetBorne(directionsService, directionsDisplay,map);
+                
+
+            }else{
+                directionsDisplay.setDirections({routes: []});
+                const output = document.getElementById("output");
+                output.innerHTML = "<div > Erreur : "+ status +"</div>";
+            }
+        });
+    }
+
+    function calculTrajetBorne(directionsService, directionsDisplay,map){
+        var originPointLat = dep[0];
+        var originPointLong = dep[1];
+        markersPos.forEach(element => {
+
+
+            var res = google.maps.geometry.spherical.computeDistanceBetween(new google.maps.LatLng(originPointLat, originPointLong), new google.maps.LatLng(element[0], element[1]));
+            var index = document.getElementById('car-model').selectedIndex
+            if (res > (mycars[index]['range']-15)*1000){
+                originPointLat = element[0];
+                originPointLong = element[1];
+                tabBorne.push([originPointLat,originPointLong]);
+            }
+            
+
+        });
+
+        socket.emit("CalculateBorneWaypoint", tabBorne);
+        var compteur = 0;
+        var tabTri = [];
+        socket.on('BorneWaypoint',function(tabwaypoint){
+            compteur++;
+            if (tabwaypoint){
+                tabTri.push(tabwaypoint);
+            }
+            
+            if (compteur === tabBorne.length){
+                tabTri.sort(function(x,y){
+                    return y[0]-x[0];
+                });
+                tabTri.forEach(element => {
+                    
+                    tabWaypointBorne.push({ location: new google.maps.LatLng(element[0], element[1]), stopover: true });
+                });
+
+
                 var request = {
                     origin: document.getElementById("depart").value,
                     destination: document.getElementById("arrivee").value,
+                    waypoints: tabWaypointBorne,
                     travelMode: google.maps.TravelMode.DRIVING,
                     unitSystem: google.maps.UnitSystem.METRIC
                 };
+                
 
                 directionsService.route(request, (response, status) => {
                     if (status == google.maps.DirectionsStatus.OK) {
                         const output = document.getElementById("output");
-                        resultDistance = response.routes[0].legs[0].distance.text;
-                        resultDuration = response.routes[0].legs[0].duration.text;
-                        console.log(response.routes[0])
-                        response.routes[0].overview_path.forEach((e)=>{
-                            console.log(e.toUrlValue(6).split(','))
-                            var marker = new google.maps.Marker({
-                            position: {
-                                lat : parseFloat( e.toUrlValue(6).split(',')[0]),
-                                lng : parseFloat(e.toUrlValue(6).split(',')[1])
-
-                            }
-                            });
-                            marker.setMap(map)
+                        resultatDistance = 0;
+                        resultatDuration = 0;
+                        response.routes[0].legs.forEach((e)=>{
+                            resultatDistance += e.distance.value;
+                            resultatDuration += e.duration.value;
                         })
-                        console.log(response.routes[0].legs[0])
-                        // console.log(response.routes[0].legs[0].)
-                        output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ resultDistance + "<br> Durée : "+resultDuration +"</div>";
+
+                        resultatDistance = resultatDistance/1000;
+                        var index = document.getElementById('car-model').selectedIndex
+                        resultatDuration += mycars[index]['fastChargeTime']!=0 ? 60* mycars[index]['fastChargeTime'] * tabWaypointBorne.length : 60 * mycars[index]['chargeTime'] * tabWaypointBorne.length
+                        var textDuration = secondsToHms(resultatDuration);
+
+                        output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ resultDistance + "<br> Durée : "+textDuration+"</div>";
                         directionsDisplay.setDirections(response);
+                    
                     }else{
                         directionsDisplay.setDirections({routes: []});
                         const output = document.getElementById("output");
-                        output.innerHTML = "<div class='tag is-danger'> Erreur : "+ status +"</div>";
+                        output.innerHTML = "<div > Erreur : "+ status +"</div>";
                     }
-                });
+
+            });
+
             }
+        });
 
-
-        
+    }
+  
+    
       </script>
 </head>
 
@@ -195,69 +355,6 @@
     }
 </style>
 <script>
-
-    var socket = io('https://nodeserver-info802.herokuapp.com');
-    var mycars;
-
-
-    window.onload = addCarsName;
-    function addCarsName(){
-        socket.emit("requestCarArray");
-        socket.on('sendCarArray',function(carArray){
-            mycars = carArray;
-            console.log(mycars);
-            var list = document.getElementById('car-model');
-
-            mycars.forEach(function(item, index){
-                var option = document.createElement('option');
-                option.value = index;
-                option.innerHTML = item['model'];                
-                list.appendChild(option);
-
-            });
-
-
-            var range = document.getElementById("range");
-            var fastChargeTime = document.getElementById('fastChargeTime');
-            var chargeTime = document.getElementById('chargeTime');
-
-            range.innerText = mycars[0]['range'] + 'km';
-            fastChargeTime.innerHTML = mycars[0]['fastChargeTime'] + 'min(s)';
-            chargeTime.innerHTML = mycars[0]['chargeTime'] + 'min(s)';
-        });
-    }
-
-    function updateSelect(selectObject) {
-
-            var index = selectObject.selectedIndex;
-            var range = document.getElementById("range");
-            var fastChargeTime = document.getElementById('fastChargeTime');
-            var chargeTime = document.getElementById('chargeTime');
-
-            range.innerHTML = mycars[index]['range'] + 'km';
-            if (mycars[index]['fastChargeTime']==0){
-                fastChargeTime.innerHTML = 'Non disponible';
-                
-            }else{
-                fastChargeTime.innerHTML = mycars[index]['fastChargeTime'] + 'min(s)';
-            }
-            chargeTime.innerHTML = mycars[index]['chargeTime'] + 'min(s)';
-        }
-      
-    function calculate(){
-        console.log("calculate");
-        
-        var index = document.getElementById('car-model').selectedIndex;
-        socket.emit('calculateRideTime',  mycars[index], document.getElementById('distance').value, document.getElementById('speed').value);
-        
-        socket.on('getRideTime',function(result){
-        var time = document.getElementById('time');
-        time.innerText = result;
-    });
-    }
-
-    
-            
 
 </script>
 </body>

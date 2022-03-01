@@ -2,6 +2,7 @@ var app = require('express');
 var socketio = require('socket.io');
 var soap = require('soap');
 const request = require('request');
+const e = require('express');
 
 const PORT = process.env.PORT || 3000;
 
@@ -24,7 +25,7 @@ io.on('connection', function(socket){
                 io.emit('sendCarNameArray', res)
             });
         });
-    })
+    });
 
     socket.on('requestCarArray',function(){
         soap.createClient(urlSoap, function(err, client) {
@@ -33,7 +34,7 @@ io.on('connection', function(socket){
                 io.emit('sendCarArray', evalData)
             });
         });
-    })
+    });
     
     socket.on('calculateRideTime',function(data, rideLength, averageSpeed){
         console.log(data)
@@ -54,6 +55,35 @@ io.on('connection', function(socket){
 
             }); 
     }
+    });
+
+    socket.on('CalculateBorneWaypoint',function(tabBorne){
+
+        tabBorne.forEach(element => {
+
+            var restApi = `https://opendata.reseaux-energies.fr/api/records/1.0/search/?dataset=bornes-irve&q=&facet=region&geofilter.distance=${element[0]}%2C${element[1]}%2C10000`;
+            request(restApi, (error, response, body)=>{
+        
+                // Printing the error if occurred
+                if(error) console.log(error)
+                
+                // Printing status code
+                console.log(response.statusCode);
+
+                
+                // Printing body
+
+                var json = JSON.parse(body);
+                if (json.nhits>0){
+                    console.log(json)
+
+                    io.emit('BorneWaypoint',[json.records[0].geometry.coordinates[1],json.records[0].geometry.coordinates[0]])
+                }else{
+                    io.emit('BorneWaypoint',0)
+                }
+                
+            }); 
+        });
     })
 
     function secondsToHms(d) {
