@@ -75,7 +75,6 @@ io.on('connection', function(socket){
 
                 var json = JSON.parse(body);
                 if (json.nhits>0){
-                    console.log(json)
 
                     io.emit('BorneWaypoint',[json.records[0].geometry.coordinates[1],json.records[0].geometry.coordinates[0]])
                 }else{

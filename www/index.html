@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script>
        
-    var socket = io('https://nodeserver-info802.herokuapp.com');
+    // var socket = io('https://nodeserver-info802.herokuapp.com');
+    var socket = io('localhost:3000');
     var mycars;
     var tabBorne = [];
     var tabWaypointBorne = [];
@@ -154,7 +155,6 @@
 
                     markersPos.push([markLat,markLong]);
 
-
                 })
 
                     calculTrajetBorne(directionsService, directionsDisplay,map);
@@ -184,8 +184,31 @@
             
 
         });
+        if(tabBorne.length<1){
+            request = {
+                        origin: document.getElementById("depart").value,
+                        destination: document.getElementById("arrivee").value,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC
+                    };
 
-        socket.emit("CalculateBorneWaypoint", tabBorne);
+                    directionsService.route(request, (response, status) => {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        const output = document.getElementById("output");
+
+                        output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ response.routes[0].legs[0].distance.text + "<br> Durée : "+response.routes[0].legs[0].duration.text+"</div>";
+                        directionsDisplay.setDirections(response);
+                    
+                    }else{
+                        directionsDisplay.setDirections({routes: []});
+                        const output = document.getElementById("output");
+                        output.innerHTML = "<div > Erreur : "+ status +"</div>";
+                    }
+                });
+
+
+        }else{
+            socket.emit("CalculateBorneWaypoint", tabBorne);
         var compteur = 0;
         var tabTri = [];
         socket.on('BorneWaypoint',function(tabwaypoint){
@@ -202,47 +225,33 @@
                     
                     tabWaypointBorne.push({ location: new google.maps.LatLng(element[0], element[1]), stopover: true });
                 });
-
-                if(tabWaypointBorne>1){
-                    var request = {
+                var request;
+                    request = {
                         origin: document.getElementById("depart").value,
                         destination: document.getElementById("arrivee").value,
                         waypoints: tabWaypointBorne,
                         travelMode: google.maps.TravelMode.DRIVING,
                         unitSystem: google.maps.UnitSystem.METRIC
                     };
-                }else{
-                    var request = {
-                        origin: document.getElementById("depart").value,
-                        destination: document.getElementById("arrivee").value,
-                        travelMode: google.maps.TravelMode.DRIVING,
-                        unitSystem: google.maps.UnitSystem.METRIC
-                    };
-                }
 
 
-                
 
                 directionsService.route(request, (response, status) => {
                     if (status == google.maps.DirectionsStatus.OK) {
                         const output = document.getElementById("output");
 
-                        resultatDistance = 0;
-                        resultatDuration = 0;
-                        response.routes[0].legs.forEach((e)=>{
-                            resultatDistance += e.distance.value;
-                            resultatDuration += e.duration.value;
-                        })
+                            resultatDistance = 0;
+                            resultatDuration = 0;
+                            response.routes[0].legs.forEach((e)=>{
+                                resultatDistance += e.distance.value;
+                                resultatDuration += e.duration.value;
+                            })
 
-                        resultatDistance = resultatDistance/1000;
-                        var index = document.getElementById('car-model').selectedIndex
-                        resultatDuration += mycars[index]['fastChargeTime']!=0 ? 60* mycars[index]['fastChargeTime'] * tabWaypointBorne.length : 60 * mycars[index]['chargeTime'] * tabWaypointBorne.length
-                        var textDuration = secondsToHms(resultatDuration);
-                        if(tabWaypointBorne>1){
-                        output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ resultDistance + "<br> Durée : "+textDuration+"</div>";
-                        }else{
-                            output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ result.route[0].legs[0].distance.text + "<br> Durée : "+result.route[0].legs[0].duration.text+"</div>";
-                        }
+                            resultatDistance = resultatDistance/1000;
+                            var index = document.getElementById('car-model').selectedIndex
+                            resultatDuration += mycars[index]['fastChargeTime']!=0 ? 60* mycars[index]['fastChargeTime'] * tabWaypointBorne.length : 60 * mycars[index]['chargeTime'] * tabWaypointBorne.length
+                            var textDuration = secondsToHms(resultatDuration);
+                            output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ resultDistance + "<br> Durée : "+textDuration+"</div>";
                         directionsDisplay.setDirections(response);
                     
                     }else{
@@ -255,6 +264,8 @@
 
             }
         });
+        }
+        
 
     }
   
