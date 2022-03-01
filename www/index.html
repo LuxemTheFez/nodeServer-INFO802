@@ -8,6 +8,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script>
+
+            var options = {
+                // types: ['(cities)'],
+                types: ['address'],
+            componentRestrictions:{'country': ['FR','IT']},
+            fields : ['place_id','geometry','name']
+            };
+
+            var input1 = document.getElementById('depart');
+            var autocomplete1 = new google.maps.places.Autocomplete(input1, options);
+
+            var input2 = document.getElementById('arrivee');
+            var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
+         
+
         // Initialize and add the map
         function initMap() {
             // The location of Uluru
@@ -54,19 +69,7 @@
                 });
             }
 
-            var options = {
-                // types: ['(cities)'],
-                types: ['address'],
-            componentRestrictions:{'country': ['FR','IT']},
-            fields : ['place_id','geometry','name']
-            };
 
-            var input1 = document.getElementById('depart');
-            var autocomplete1 = new google.maps.places.Autocomplete(input1, options);
-
-            var input2 = document.getElementById('arrivee');
-            var autocomplete2 = new google.maps.places.Autocomplete(input2, options);
-         
         
       </script>
 </head>
