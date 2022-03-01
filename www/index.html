@@ -226,6 +226,7 @@
                 directionsService.route(request, (response, status) => {
                     if (status == google.maps.DirectionsStatus.OK) {
                         const output = document.getElementById("output");
+
                         resultatDistance = 0;
                         resultatDuration = 0;
                         response.routes[0].legs.forEach((e)=>{
@@ -237,8 +238,11 @@
                         var index = document.getElementById('car-model').selectedIndex
                         resultatDuration += mycars[index]['fastChargeTime']!=0 ? 60* mycars[index]['fastChargeTime'] * tabWaypointBorne.length : 60 * mycars[index]['chargeTime'] * tabWaypointBorne.length
                         var textDuration = secondsToHms(resultatDuration);
-
+                        if(tabWaypointBorne>1){
                         output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ resultDistance + "<br> Durée : "+textDuration+"</div>";
+                        }else{
+                            output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Distance : "+ result.route[0].legs[0].distance.text + "<br> Durée : "+result.route[0].legs[0].duration.text+"</div>";
+                        }
                         directionsDisplay.setDirections(response);
                     
                     }else{
