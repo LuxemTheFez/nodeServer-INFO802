@@ -12,7 +12,7 @@
             var options = {
                 // types: ['(cities)'],
                 types: ['address'],
-            componentRestrictions:{'country': ['FR','IT']},
+            componentRestrictions:{'country': ['FR']},
             fields : ['place_id','geometry','name']
             };
 
@@ -26,11 +26,11 @@
         // Initialize and add the map
         function initMap() {
             // The location of Uluru
-            const uluru = { lat: 45.3333, lng: 5.5833 };
+            const stJean = { lat: 45.3333, lng: 5.5833 };
             // The map, centered at Uluru
             const map = new google.maps.Map(document.getElementById("map"), {
             zoom: 13,
-            center: uluru,
+            center: stJean,
             mapTypeId: google.maps.MapTypeId.ROADMAP
             });
             
@@ -41,12 +41,12 @@
             directionsDisplay.setMap(map);
 
             document.getElementById('button-trajet').addEventListener('click', function() {
-                calculTrajet(directionsService, directionsDisplay);
+                calculTrajet(directionsService, directionsDisplay,map);
             });
         }
 
 
-            function calculTrajet(directionsService, directionsDisplay){
+            function calculTrajet(directionsService, directionsDisplay,map){
                 var request = {
                     origin: document.getElementById("depart").value,
                     destination: document.getElementById("arrivee").value,
@@ -59,6 +59,20 @@
                         const output = document.getElementById("output");
                         resultDistance = response.routes[0].legs[0].distance.text;
                         resultDuration = response.routes[0].legs[0].duration.text;
+                        console.log(response.routes[0])
+                        response.routes[0].overview_path.forEach((e)=>{
+                            console.log(e.toUrlValue(6).split(','))
+                            var marker = new google.maps.Marker({
+                            position: {
+                                lat : parseFloat( e.toUrlValue(6).split(',')[0]),
+                                lng : parseFloat(e.toUrlValue(6).split(',')[1])
+
+                            }
+                            });
+                            marker.setMap(map)
+                        })
+                        console.log(response.routes[0].legs[0])
+                        // console.log(response.routes[0].legs[0].)
                         output.innerHTML = "<div> Départ : "+ document.getElementById("depart").value + "<br/> Arrivée : "+ document.getElementById("arrivee").value +" <br> Disitance : "+ resultDistance + "<br> Durée : "+resultDuration +"</div>";
                         directionsDisplay.setDirections(response);
                     }else{
