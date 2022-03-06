@@ -221,6 +221,10 @@
                 tabTri.sort(function(x,y){
                     return y[0]-x[0];
                 });
+                if (tabTri[0][0] > dep[0]){
+                    tabTri.reverse();
+                }
+
                 tabTri.forEach(element => {
                     
                     tabWaypointBorne.push({ location: new google.maps.LatLng(element[0], element[1]), stopover: true });
