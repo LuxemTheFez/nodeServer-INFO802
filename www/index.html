@@ -118,16 +118,16 @@
         directionsDisplay.setMap(map);
 
         document.getElementById('button-trajet').addEventListener('click', function() {
-             tabBorne = [];
-             tabWaypointBorne = [];
-             markersPos = [];
-            calculTrajet(directionsService, directionsDisplay,map,false);
+            tabBorne = [];
+            tabWaypointBorne = [];
+            markersPos = [];
+            calculTrajet(directionsService, directionsDisplay,map);
         });
 
     }
 
 
-    function calculTrajet(directionsService, directionsDisplay,map,afficheBorne){
+    function calculTrajet(directionsService, directionsDisplay,map){
 
             var request = {
                 origin: document.getElementById("depart").value,
